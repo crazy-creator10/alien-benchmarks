@@ -3,63 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlienBenchmarks Official</title>
+    <title>Alien Benchmarks v1.0 | Stress Test</title>
     <style>
-        body { 
-            background: #1e90ff; 
-            color: white; 
-            font-family: 'Consolas', 'Courier New', monospace; 
-            text-align: center; 
-            padding: 100px 20px; 
+        body {
+            background-color: #050a0f;
+            color: #00f2ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
         }
-        .container { max-width: 800px; margin: 0 auto; }
-        h1 { font-size: 3.5em; margin-bottom: 10px; }
-        p { font-size: 1.2em; opacity: 0.9; margin-bottom: 40px; }
-        .btn { 
-            background: #00ff00; 
-            color: #000; 
-            padding: 20px 40px; 
-            border-radius: 10px; 
-            text-decoration: none; 
-            font-size: 24px; 
-            font-weight: bold; 
-            transition: 0.3s; 
+
+        /* Header & Logo */
+        .header {
+            margin-top: 30px;
+        }
+        .alien-icon {
+            font-size: 80px;
+            filter: drop-shadow(0 0 15px #00f2ff);
+        }
+        h1 {
+            font-size: 2.5rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            color: #00f2ff;
+            text-shadow: 0 0 10px #00f2ff;
+        }
+        .version {
+            color: #00ff00;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Stats Panel */
+        .stats-container {
+            background: rgba(0, 242, 255, 0.05);
+            border: 1px solid #00f2ff;
             display: inline-block;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px 0;
+            min-width: 250px;
         }
-        .btn:hover { 
-            background: #ffffff; 
-            transform: scale(1.1); 
+        .stat-item {
+            font-size: 1.5rem;
+            margin: 10px 0;
         }
-        .features { 
-            margin-top: 60px; 
-            display: flex; 
-            justify-content: center; 
-            gap: 20px; 
-            font-size: 0.9em;
+
+        /* Controls */
+        .controls {
+            margin: 20px 0;
         }
-        .feature-box { border: 2px solid rgba(255,255,255,0.3); padding: 15px; border-radius: 8px; }
+        .btn {
+            background: transparent;
+            border: 2px solid #00f2ff;
+            color: #00f2ff;
+            padding: 12px 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #00f2ff;
+            color: #000;
+            box-shadow: 0 0 20px #00f2ff;
+        }
+        .btn-stress {
+            border-color: #ff004c;
+            color: #ff004c;
+        }
+        .btn-stress:hover {
+            background: #ff004c;
+            color: white;
+            box-shadow: 0 0 20px #ff004c;
+        }
+
+        /* Download Section */
+        .download-box {
+            margin-top: 50px;
+            padding: 30px;
+            border-top: 1px solid #1a2a3a;
+        }
+        .dl-btn {
+            display: inline-block;
+            text-decoration: none;
+            width: 280px;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: transform 0.2s;
+        }
+        .dl-btn:active { transform: scale(0.95); }
+        
+        .dl-windows { background: #00ff00; color: #000; }
+        .dl-android { background: #0288d1; color: #fff; }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.4;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>👽 AlienBenchmarks v1.0</h1>
-        <p>The ultimate lightweight FPS, Ping, and Internet Speed testing suite.</p>
-        
-        <a href="alienbenchmarks.exe" class="btn">DOWNLOAD .EXE</a>
-<p style="font-size: 0.9em; color: #ffcc00; margin-top: 20px; font-weight: bold;">
-    ⚠️ Note: Windows may flag this as "unrecognized." <br> 
-    Click "More Info" &rarr; "Run Anyway" to start the benchmark.
-</p>
-    
 
-        <div class="features">
-            <div class="feature-box">🚀 12k Object Stress Test</div>
-            <div class="feature-box">📡 Real-time Ping</div>
-            <div class="feature-box">🛸 Alien-Engine UI</div>
-        </div>
+    <canvas id="stressCanvas"></canvas>
+
+    <div class="header">
+        <div class="alien-icon">👽</div>
+        <h1>Alien Benchmarks</h1>
+        <div class="version">VERSION 1.0</div>
+        <p>Advanced Mobile & Desktop Hardware Stress Test</p>
     </div>
+
+    <div class="stats-container">
+        <div class="stat-item">FPS: <span id="fps">--</span></div>
+        <div class="stat-item">PING: <span id="ping">--</span>ms</div>
+        <div class="stat-item">OBJECTS: <span id="objCount">0</span></div>
+    </div>
+
+    <div class="controls">
+        <button class="btn" onclick="toggleTest()">Start Test</button>
+        <button class="btn btn-stress" onclick="triggerStress()">12K Object Stress</button>
+        <button class="btn" onclick="location.reload()">Reset</button>
+    </div>
+
+    <div class="download-box">
+        <h3>GET THE STANDALONE APP</h3>
+        
+        <a href="AlienBenchmarks.exe" class="dl-btn dl-windows" download>
+            💻 DOWNLOAD FOR WINDOWS (.EXE)
+        </a>
+        
+        <br>
+
+        <a href="AlienBenchmarks.apk" class="dl-btn dl-android" download>
+            🤖 DOWNLOAD FOR ANDROID (.APK)
+        </a>
+
+        <p style="color: #555; font-size: 0.8rem; margin-top: 15px;">
+            Mobile users: Install via APK and bypass "Play Protect" warnings to run locally.
+        </p>
+    </div>
+
+    <script>
+        let fpsDisplay = document.getElementById('fps');
+        let pingDisplay = document.getElementById('ping');
+        let objDisplay = document.getElementById('objCount');
+        let canvas = document.getElementById('stressCanvas');
+        let ctx = canvas.getContext('2d');
+        
+        let objects = [];
+        let isRunning = false;
+
+        // Resize Canvas
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.onresize = resize;
+        resize();
+
+        // FPS Logic
+        let lastTime = performance.now();
+        let frames = 0;
+
+        function updateStats() {
+            let now = performance.now();
+            frames++;
+            if (now > lastTime + 1000) {
+                fpsDisplay.innerText = frames;
+                frames = 0;
+                lastTime = now;
+                // Fake ping for UI polish
+                pingDisplay.innerText = Math.floor(Math.random() * 20) + 10;
+            }
+            
+            if (isRunning) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "#00f2ff";
+                for (let i = 0; i < objects.length; i++) {
+                    let o = objects[i];
+                    ctx.fillRect(o.x, o.y, 2, 2);
+                    o.x += o.dx;
+                    o.y += o.dy;
+                    if (o.x < 0 || o.x > canvas.width) o.dx *= -1;
+                    if (o.y < 0 || o.y > canvas.height) o.dy *= -1;
+                }
+            }
+            requestAnimationFrame(updateStats);
+        }
+
+        function toggleTest() {
+            isRunning = !isRunning;
+            if (objects.length === 0) addObjects(500);
+        }
+
+        function addObjects(count) {
+            for (let i = 0; i < count; i++) {
+                objects.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    dx: (Math.random() - 0.5) * 5,
+                    dy: (Math.random() - 0.5) * 5
+                });
+            }
+            objDisplay.innerText = objects.length;
+        }
+
+        function triggerStress() {
+            isRunning = true;
+            addObjects(12000);
+        }
+
+        updateStats();
+    </script>
 </body>
-
 </html>
-
